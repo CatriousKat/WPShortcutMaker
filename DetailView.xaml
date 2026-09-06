@@ -1,0 +1,22 @@
+<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <StackPanel Margin="12">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock x:Name="ShortcutTitleText" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            <Button Content="Settings" Click="Settings_Click" Margin="12,0,0,0"/>
+        </StackPanel>
+        
+        <Button Content="[Add action]" Click="AddAction_Click" Margin="0,0,0,12"/>
+
+        <!-- Action List -->
+        <ListBox x:Name="ActionsListBox" Height="400">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="0,4">
+                        <TextBlock Text="{Binding DisplayDescription}" VerticalAlignment="Center" Width="240"/>
+                        <Button Content="EDIT" Click="EditAction_Click" Tag="{Binding Index}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </StackPanel>
+</Grid>

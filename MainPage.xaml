@@ -1,0 +1,19 @@
+<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <StackPanel Margin="12">
+        <TextBlock Text="Shortcut Maker" FontSize="24" FontWeight="Bold" Margin="0,0,0,12"/>
+        
+        <!-- Shortcut List -->
+        <ListBox x:Name="ShortcutsListBox" Height="500">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="0,6">
+                        <Image Source="{Binding ShortcutIcon}" Width="32" Height="32" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding ShortcutName}" VerticalAlignment="Center" Width="180" FontSize="16"/>
+                        <Button Content="EDIT" Click="Edit_Click" Tag="{Binding ShortcutUuid}" Margin="4,0"/>
+                        <Button Content="DELETE" Click="Delete_Click" Tag="{Binding ShortcutUuid}" Margin="4,0"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </StackPanel>
+</Grid>

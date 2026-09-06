@@ -1,0 +1,22 @@
+<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <StackPanel Margin="12" VerticalAlignment="Center">
+        <TextBlock Text="Add action" FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
+        
+        <StackPanel Orientation="Horizontal" Margin="0,6">
+            <TextBlock Text="Display dialog" VerticalAlignment="Center" Width="160"/>
+            <Button Content="[ADD]" Click="AddDialogAction_Click"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,6">
+            <TextBlock Text="Write file" VerticalAlignment="Center" Width="160"/>
+            <Button Content="[ADD]" Click="AddWriteFileAction_Click"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,6">
+            <TextBlock Text="Display input dialog" VerticalAlignment="Center" Width="160"/>
+            <Button Content="[ADD]" Click="AddInputDlgAction_Click"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,6">
+            <TextBlock Text="Display Base64 dialog" VerticalAlignment="Center" Width="160"/>
+            <Button Content="[ADD]" Click="AddBase64DlgAction_Click"/>
+        </StackPanel>
+    </StackPanel>
+</Grid>

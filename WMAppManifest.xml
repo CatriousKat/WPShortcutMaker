@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Deployment xmlns="http://schemas.microsoft.com/windowsphone/2009/deployment" AppPlatformVersion="8.1">
+  <App PublisherID="11111111-1111-1111-1111-111111111111" ProductID="{4EBD0208-8328-5D69-8C44-EC50939C0967}" Title="Shortcut Maker" Version="1.0.0.0" Genre="apps.normal" Author="Catrious" Description="A shortcut maker for Windows Phone." Publisher="Developer">
+    <IconPath IsRelative="true" IsResource="false">Assets\ApplicationIcon.png</IconPath>
+    <Capabilities>
+      <Capability Name="ID_CAP_NETWORKING" />
+      <Capability Name="ID_CAP_SHARED_DOCUMENTS" />
+      <Capability Name="ID_CAP_MEDIALIB_PHOTO" />
+    </Capabilities>
+    <Tasks>
+      <DefaultTask Name="_default" ImagePath="MainPage.xaml" />
+    </Tasks>
+  </App>
+</Deployment>

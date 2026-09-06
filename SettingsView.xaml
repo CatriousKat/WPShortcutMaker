@@ -1,0 +1,20 @@
+<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <StackPanel Margin="12">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <TextBlock Text="Settings" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            <Button Content="[BACK]" Click="Back_Click" Margin="16,0,0,0"/>
+        </StackPanel>
+
+        <TextBlock Text="Name" Margin="0,4"/>
+        <TextBox x:Name="NameTextBox" Margin="0,0,0,12" TextChanged="NameTextBox_TextChanged"/>
+
+        <TextBlock Text="Icon" Margin="0,4"/>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <Image x:Name="IconPreview" Width="48" Height="48" Margin="0,0,12,0"/>
+            <Button Content="[Set icon]" Click="SetIcon_Click" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <TextBlock Text="UUID" Margin="0,4"/>
+        <TextBox x:Name="UuidTextBox" IsReadOnly="True" Margin="0,0,0,12"/>
+    </StackPanel>
+</Grid>
