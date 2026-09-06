@@ -1,12 +1,16 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml.Controls;
 
 public static class WpcutValidator
 {
+    private static string _lastInput = string.Empty;
+
     public static async Task<bool> ValidateAndExecuteAsync(StorageFile wpcutFile)
     {
         string fileName = Path.GetFileNameWithoutExtension(wpcutFile.Name);
@@ -23,14 +27,12 @@ public static class WpcutValidator
             return false;
         }
 
-        // 1. Validate UUID Match
         if (data == null || !string.Equals(data.ShortcutUuid, fileName, StringComparison.OrdinalIgnoreCase))
         {
             await ShowErrorAsync("This shortcut is invalid.");
             return false;
         }
 
-        // 2. Validate Icon Loading
         try
         {
             if (!string.IsNullOrEmpty(data.ShortcutIcon))
@@ -59,7 +61,6 @@ public static class WpcutValidator
             return false;
         }
 
-        // 3. Validate Actions & Write Paths
         if (data.ShortcutActions == null)
         {
             await ShowErrorAsync("This shortcut is invalid.");
@@ -70,7 +71,8 @@ public static class WpcutValidator
         {
             if (!string.IsNullOrEmpty(action.WriteFilePath))
             {
-                if (!IsPathWritable(action.WriteFilePath))
+                string evaluatedPath = ReplaceVariables(action.WriteFilePath);
+                if (!IsPathWritable(evaluatedPath))
                 {
                     await ShowErrorAsync("Can't write file.");
                     return false;
@@ -78,7 +80,96 @@ public static class WpcutValidator
             }
         }
 
+        _lastInput = string.Empty;
+        foreach (var action in data.ShortcutActions)
+        {
+            await ExecuteActionAsync(action);
+        }
+
         return true;
+    }
+
+    private static async Task ExecuteActionAsync(WpcutAction action)
+    {
+        string type = action.Type?.ToLowerInvariant();
+        string evaluatedDialog = ReplaceVariables(action.Dialog);
+
+        if (type == "dialog" || string.IsNullOrEmpty(type))
+        {
+            MessageDialog msg = new MessageDialog(evaluatedDialog ?? string.Empty);
+            await msg.ShowAsync();
+        }
+        else if (type == "inputdialog")
+        {
+            _lastInput = await ShowInputPromptAsync(evaluatedDialog ?? "Enter input:");
+        }
+        else if (type == "base64dialog")
+        {
+            string targetText = !string.IsNullOrEmpty(_lastInput) ? _lastInput : (evaluatedDialog ?? string.Empty);
+            string base64Result = Convert.ToBase64String(Encoding.UTF8.GetBytes(targetText));
+            
+            MessageDialog msg = new MessageDialog(base64Result, "Base64 Encoded");
+            await msg.ShowAsync();
+            _lastInput = base64Result;
+        }
+        else if (type == "writefile" || !string.IsNullOrEmpty(action.WriteFilePath))
+        {
+            string path = ReplaceVariables(action.WriteFilePath);
+            string content = ReplaceVariables(action.WriteFileContent);
+
+            StorageFile file = await ResolveFileForWritingAsync(path);
+            await FileIO.WriteTextAsync(file, content);
+        }
+    }
+
+    private static string ReplaceVariables(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        return input.Replace("%input%", _lastInput ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static async Task<string> ShowInputPromptAsync(string promptMessage)
+    {
+        TextBox inputTextBox = new TextBox { AcceptsReturn = false, Header = promptMessage };
+        ContentDialog dialog = new ContentDialog
+        {
+            Title = "Input Required",
+            Content = inputTextBox,
+            PrimaryButtonText = "OK",
+            SecondaryButtonText = "Cancel"
+        };
+
+        ContentDialogResult result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return inputTextBox.Text;
+        }
+        return string.Empty;
+    }
+
+    private static async Task<StorageFile> ResolveFileForWritingAsync(string relativePath)
+    {
+        string cleanPath = relativePath.Replace('/', '\\').TrimStart('\\');
+        if (cleanPath.StartsWith("Documents\\", StringComparison.OrdinalIgnoreCase))
+        {
+            string subPath = cleanPath.Substring("Documents\\".Length);
+            StorageFolder docsFolder = KnownFolders.DocumentsLibrary;
+            
+            string directory = Path.GetDirectoryName(subPath);
+            string fileName = Path.GetFileName(subPath);
+            
+            StorageFolder targetFolder = docsFolder;
+            if (!string.IsNullOrEmpty(directory))
+            {
+                foreach (var dir in directory.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    targetFolder = await targetFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+                }
+            }
+            
+            return await targetFolder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
+        }
+        throw new UnauthorizedAccessException("Can't write file.");
     }
 
     private static bool IsPathWritable(string path)
@@ -98,5 +189,5 @@ public static class WpcutValidator
 
     private static T DeserializeJson<T>(string json) => 
         (T)new System.Runtime.Serialization.Json.DataContractJsonSerializer(typeof(T))
-            .ReadObject(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json)));
+            .ReadObject(new MemoryStream(Encoding.UTF8.GetBytes(json)));
 }
