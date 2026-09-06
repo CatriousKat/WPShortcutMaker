@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Windows.Storage;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
@@ -132,6 +133,62 @@ public static class WpcutValidator
             StorageFile file = await ResolveFileForWritingAsync(path);
             await FileIO.WriteTextAsync(file, content);
         }
+        else if (type == "if")
+        {
+            if (EvaluateCondition(action.Condition))
+            {
+                if (action.Actions != null)
+                {
+                    foreach (var subAction in action.Actions)
+                    {
+                        await ExecuteActionAsync(subAction);
+                    }
+                }
+            }
+        }
+    }
+
+    private static bool EvaluateCondition(string condition)
+    {
+        if (string.IsNullOrEmpty(condition)) return false;
+        string evaluated = ReplaceVariables(condition);
+
+        if (evaluated.Contains("=="))
+        {
+            var parts = evaluated.Split(new[] { "==" }, StringSplitOptions.None);
+            if (parts.Length == 2)
+            {
+                string left = CleanLiteral(parts[0]);
+                string right = CleanLiteral(parts[1]);
+                return string.Equals(left, right, StringComparison.Ordinal);
+            }
+        }
+        else if (evaluated.Contains("!="))
+        {
+            var parts = evaluated.Split(new[] { "!=" }, StringSplitOptions.None);
+            if (parts.Length == 2)
+            {
+                string left = CleanLiteral(parts[0]);
+                string right = CleanLiteral(parts[1]);
+                return !string.Equals(left, right, StringComparison.Ordinal);
+            }
+        }
+
+        return false;
+    }
+
+    private static string CleanLiteral(string val)
+    {
+        if (val == null) return string.Empty;
+        val = val.Trim();
+        if ((val.StartsWith("\"") && val.EndsWith("\"")) || (val.StartsWith("'") && val.EndsWith("'")))
+        {
+            if (val.Length >= 2)
+            {
+                val = val.Substring(1, val.Length - 2);
+            }
+        }
+        return val;
     }
 
     private static string ReplaceVariables(string input)

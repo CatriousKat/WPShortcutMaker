@@ -31,4 +31,10 @@ public class WpcutAction
 
     [DataMember(Name = "writefilecontent")]
     public string WriteFileContent { get; set; }
+
+    [DataMember(Name = "condition")]
+    public string Condition { get; set; }
+
+    [DataMember(Name = "actions")]
+    public List<WpcutAction> Actions { get; set; } = new List<WpcutAction>();
 }
