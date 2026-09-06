@@ -14,7 +14,19 @@ public static class WpcutValidator
     public static async Task<bool> ValidateAndExecuteAsync(StorageFile wpcutFile)
     {
         string fileName = Path.GetFileNameWithoutExtension(wpcutFile.Name);
-        string jsonContent = await FileIO.ReadTextAsync(wpcutFile);
+        string rawContent = await FileIO.ReadTextAsync(wpcutFile);
+
+        string jsonContent;
+        try
+        {
+            byte[] decodedBytes = Base32Utility.FromBase32String(rawContent);
+            jsonContent = Encoding.UTF8.GetString(decodedBytes, 0, decodedBytes.Length);
+        }
+        catch
+        {
+            await ShowErrorAsync("This shortcut is invalid.");
+            return false;
+        }
 
         WpcutSchema data;
         try
