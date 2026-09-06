@@ -194,7 +194,23 @@ public static class WpcutValidator
     private static string ReplaceVariables(string input)
     {
         if (string.IsNullOrEmpty(input)) return input;
-        return input.Replace("%input%", _lastInput ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        
+        string result = input.Replace("%input%", _lastInput ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        result = result.Replace("%wpver%", GetWindowsPhoneVersion(), StringComparison.OrdinalIgnoreCase);
+        
+        return result;
+    }
+
+    private static string GetWindowsPhoneVersion()
+    {
+        try
+        {
+            return Environment.OSVersion.ToString();
+        }
+        catch
+        {
+            return "Windows Phone 8.1";
+        }
     }
 
     private static async Task<string> ShowInputPromptAsync(string promptMessage)
